@@ -9,8 +9,8 @@ fun main() {
     var line = readLine()
     var score = 0
     while (line != null) {
-        val oppHand = line[0].let(::convert)
-        val myHand = line[2].let(::convert)
+        val oppHand = convert(line[0])
+        val myHand = convert(line[2])
 
         if (oppHand == null || myHand == null) {
             error("Failed parsing: $line")
