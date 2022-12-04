@@ -2,4 +2,4 @@ all:
 	kotlinc solve.kt
 
 run:
-	kotlin SolveKt
+	kotlin SolveKt < input
