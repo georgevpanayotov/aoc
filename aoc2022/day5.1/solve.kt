@@ -17,7 +17,10 @@ fun parseStacks(stackText: ArrayList<String>): Map<Int, ArrayDeque<Char>> {
         val line = stackText.`get`(i)
 
         while (index < line.length) {
-            stacks[stackNumber]?.addLast(line[index])
+            val crate = line[index]
+            if (crate != ' ') {
+                stacks[stackNumber]?.addLast(crate)
+            }
 
             stackNumber++
             index = getIndex(stackNumber)
