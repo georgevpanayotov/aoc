@@ -13,13 +13,10 @@ fun tailDirection(head: Pair<Int, Int>, tail: Pair<Int, Int>): Pair<Int, Int>? {
         return null
     }
 
-    if (row == 0) {
-        return Pair(0, col / Math.abs(col))
-    } else if (col == 0) {
-        return Pair(row / Math.abs(row), 0)
-    } else {
-        return Pair(row / Math.abs(row), col / Math.abs(col))
-    }
+    val unitRow = if (row != 0) { row / Math.abs(row) } else 0
+    val unitCol = if (col != 0) { col / Math.abs(col) } else 0
+
+    return Pair(unitRow, unitCol)
 }
 
 fun printIt(head: Pair<Int, Int>, tail: Pair<Int, Int>) {
