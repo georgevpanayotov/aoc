@@ -20,12 +20,35 @@ fun tailDirection(head: Pair<Int, Int>, tail: Pair<Int, Int>): Pair<Int, Int>? {
 }
 
 fun printIt(head: Pair<Int, Int>, tail: Pair<Int, Int>) {
-    for (row in 4 downTo 0) {
-        for (col in 0..5) {
-            if (head == Pair(row, col)) {
+    var bottomLeft = Pair(0, 0)
+    var topRight = Pair(4, 5)
+
+    for (point in arrayOf(head, tail)) {
+        if (point.first < bottomLeft.first) {
+            bottomLeft = Pair(point.first, bottomLeft.second)
+        }
+        if (point.first > topRight.first) {
+            topRight = Pair(point.first, topRight.second)
+        }
+
+        if (point.second < bottomLeft.second) {
+            bottomLeft = Pair(bottomLeft.first, point.second)
+        }
+        if (point.second > topRight.second) {
+            topRight = Pair(topRight.first, point.second)
+        }
+    }
+
+    print("\u001b[2J")
+    for (row in topRight.first downTo bottomLeft.first) {
+        for (col in bottomLeft.second..topRight.second) {
+            val curr = Pair(row, col)
+            if (head == curr) {
                 print("H")
-            } else if (tail == Pair(row, col)) {
+            } else if (tail == curr) {
                 print("T")
+            } else if (curr == Pair(0, 0)) {
+                print("s")
             } else {
                 print(".")
             }
@@ -33,6 +56,7 @@ fun printIt(head: Pair<Int, Int>, tail: Pair<Int, Int>) {
         print("\n")
     }
     print("\n")
+    Thread.sleep(100)
 }
 
 fun main() {
