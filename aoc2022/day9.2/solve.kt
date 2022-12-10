@@ -20,29 +20,58 @@ fun tailDirection(head: Pair<Int, Int>, tail: Pair<Int, Int>): Pair<Int, Int>? {
 }
 
 fun printIt(head: Pair<Int, Int>, tails: Array<Pair<Int, Int>>) {
-    for (row in 20 downTo 0) {
-        for (col in 0..25) {
+    val knots = tails.toMutableList()
+    knots.add(head)
+
+    var bottomLeft = Pair(0, 0)
+    var topRight = Pair(20, 25)
+
+    for (point in knots) {
+        if (point.first < bottomLeft.first) {
+            bottomLeft = Pair(point.first, bottomLeft.second)
+        }
+        if (point.first > topRight.first) {
+            topRight = Pair(point.first, topRight.second)
+        }
+
+        if (point.second < bottomLeft.second) {
+            bottomLeft = Pair(bottomLeft.first, point.second)
+        }
+        if (point.second > topRight.second) {
+            topRight = Pair(topRight.first, point.second)
+        }
+    }
+
+    print("\u001b[2J")
+    for (row in topRight.first downTo bottomLeft.first) {
+        for (col in bottomLeft.second..topRight.second) {
+            val curr = Pair(row, col)
             var printed = false
-            if (head == Pair(row, col)) {
+            if (head == curr) {
                 print("H")
                 printed = true
             }
 
             for (i in 0..tails.size - 1) {
                 val tail = tails[i]
-                if (tail == Pair(row, col) && !printed) {
+                if (tail == curr && !printed) {
                     print("${i + 1}")
                     printed = true
                 }
             }
 
             if (!printed) {
-                print(".")
+                if (curr == Pair(0, 0)) {
+                    print("s")
+                } else {
+                    print(".")
+                }
             }
         }
         print("\n")
     }
     print("\n")
+    Thread.sleep(100)
 }
 
 fun main() {
