@@ -3,3 +3,6 @@ all:
 
 run:
 	kotlin SolveKt < input
+
+sample:
+	kotlin SolveKt < sample
