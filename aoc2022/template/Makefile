@@ -5,4 +5,4 @@ run:
 	kotlin SolveKt < input
 
 sample:
-	kotlin SolveKt < sample
+	kotlin SolveKt < sample_input
