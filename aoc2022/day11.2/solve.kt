@@ -5,13 +5,15 @@ const val RELIEF_FACTOR = 1
 const val ROUNDS = 10000
 
 class Monkey(
-    val items: MutableList<Int>,
-    val operation: (Int) -> Int,
+    val items: MutableList<BigInteger>,
+    val operation: (BigInteger) -> BigInteger,
     val divisible: Int,
     val trueMonkey: Int,
     val falseMonkey: Int
 ) : Comparable<Monkey> {
     var inspected: BigInteger = BigInteger.ZERO
+    val bigDivisible = BigInteger.valueOf(divisible.toLong())
+
     override fun compareTo(other: Monkey): Int {
         return inspected.compareTo(other.inspected)
     }
@@ -22,17 +24,17 @@ class Monkey(
 class MonkeyBuilder {
     // This would be simpler to just say `arrayListOf<>()` here but I just wanted to figure out the
     // pattern for lateinit.
-    private lateinit var items: MutableList<Int>
-    private var operation: ((Int) -> Int)? = null
+    private lateinit var items: MutableList<BigInteger>
+    private var operation: ((BigInteger) -> BigInteger)? = null
     private var divisible: Int? = null
     private var trueMonkey: Int? = null
     private var falseMonkey: Int? = null
 
     fun addItem(item: Int) {
-        safeItems().add(item)
+        safeItems().add(BigInteger.valueOf(item.toLong()))
     }
 
-    fun setOperation(operation: (Int) -> Int) {
+    fun setOperation(operation: (BigInteger) -> BigInteger) {
         this.operation = operation
     }
 
@@ -72,20 +74,20 @@ class MonkeyBuilder {
         )
     }
 
-    private fun safeItems(): MutableList<Int> {
+    private fun safeItems(): MutableList<BigInteger> {
         if (!this::items.isInitialized) {
-            items = arrayListOf<Int>()
+            items = arrayListOf<BigInteger>()
         }
 
         return items
     }
 }
 
-fun oldOrNum(operand: String, old: Int): Int {
+fun oldOrNum(operand: String, old: BigInteger): BigInteger {
     if (operand == "old") {
         return old
     } else {
-        return operand.toInt()
+        return BigInteger(operand)
     }
 }
 
@@ -225,8 +227,7 @@ fun doRound(monkeys: List<Monkey>) {
             it.remove()
 
             worry = monkey.operation(worry)
-            worry /= RELIEF_FACTOR
-            val tossTo = if (worry % monkey.divisible == 0) {
+            val tossTo = if (worry % monkey.bigDivisible == BigInteger.ZERO) {
                 monkey.trueMonkey
             } else {
                 monkey.falseMonkey
@@ -249,13 +250,21 @@ fun main() {
         monkey = parseMonkey(Lines)
     }
 
+    val roundsToCheck = setOf<Int>(1 ,20 ,1000 ,2000 ,3000 ,4000 ,5000 ,6000 ,7000 ,8000 ,9000 ,10000)
     for (i in 1..ROUNDS) {
         doRound(monkeys)
+        if (roundsToCheck.contains(i)) {
+            print("After round $i\n")
+            for (j in 0..monkeys.size - 1) {
+                print ("Monkey $j inspected items ${monkeys[j].inspected}\n")
+            }
+
+        }
     }
 
     monkeys.sort()
     val x: BigInteger = BigInteger.valueOf(monkeys[monkeys.size - 1].inspected.toLong())
     val y: BigInteger = BigInteger.valueOf(monkeys[monkeys.size - 2].inspected.toLong())
 
-    print("$x * $y = ${x * y}\n") 
+    print("$x * $y = ${x * y}\n")
 }
