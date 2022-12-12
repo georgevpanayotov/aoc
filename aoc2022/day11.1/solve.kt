@@ -1,12 +1,20 @@
 import java.util.Scanner
 
+const val RELIEF_FACTOR = 3
+const val ROUNDS = 20
+
 class Monkey(
     val items: MutableList<Int>,
     val operation: (Int) -> Int,
     val divisible: Int,
     val trueMonkey: Int,
     val falseMonkey: Int
-) {
+) : Comparable<Monkey> {
+    var inspected = 0
+    override fun compareTo(other: Monkey): Int {
+        return inspected.compareTo(other.inspected)
+    }
+
     override fun toString(): String = "items($items), operation($operation), divisible($divisible), ifTrue($trueMonkey), ifFalse($falseMonkey)"
 }
 
@@ -187,11 +195,12 @@ fun parseMonkey(lines: Iterator<Scanner>): Monkey? {
 }
 
 object Lines : Iterator<Scanner> {
-    var line: Scanner? = null
+    private var line: Scanner? = null
     override fun next(): Scanner {
         ensureLine()
         val ret = line ?: error("No next line")
         line = null
+
         return ret
     }
 
@@ -207,6 +216,26 @@ object Lines : Iterator<Scanner> {
     }
 }
 
+fun doRound(monkeys: List<Monkey>) {
+    for (monkey in monkeys) {
+        val it = monkey.items.listIterator()
+        while (it.hasNext()) {
+            var worry = it.next()
+            it.remove()
+
+            worry = monkey.operation(worry)
+            worry /= RELIEF_FACTOR
+            val tossTo = if (worry % monkey.divisible == 0) {
+                monkey.trueMonkey
+            } else {
+                monkey.falseMonkey
+            }
+            monkey.inspected++
+            monkeys[tossTo].items.add(worry)
+        }
+    }
+}
+
 fun main() {
     val monkeys = arrayListOf<Monkey>()
 
@@ -214,8 +243,18 @@ fun main() {
 
     while (monkey != null) {
         monkeys.add(monkey)
-        print("$monkey\n")
+        print("Monkey ${monkeys.size - 1} $monkey\n")
 
         monkey = parseMonkey(Lines)
     }
+
+    for (i in 1..ROUNDS) {
+        doRound(monkeys)
+    }
+
+    monkeys.sort()
+    val x = monkeys[monkeys.size - 1].inspected
+    val y = monkeys[monkeys.size - 2].inspected
+
+    print("${x * y}\n") 
 }
