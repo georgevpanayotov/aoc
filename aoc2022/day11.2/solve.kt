@@ -219,14 +219,28 @@ object Lines : Iterator<Scanner> {
     }
 }
 
-fun doRound(monkeys: List<Monkey>) {
+fun lcm(nums: MutableList<BigInteger>): BigInteger {
+    // We just happen to know that the input is all primes so we don't need to get fancy with LCM
+    // computation.
+    var lcm = BigInteger.ONE
+
+    for (num in nums) {
+        lcm *= num
+    }
+    return lcm
+}
+
+fun doRound(monkeys: List<Monkey>, modulus: BigInteger) {
     for (monkey in monkeys) {
         val it = monkey.items.listIterator()
         while (it.hasNext()) {
             var worry = it.next()
             it.remove()
 
-            worry = monkey.operation(worry)
+            // Use a modulus to keep the `worry` values from getting so big we end up with OOM.
+            // Modulus must be chosen as LCM of the `divisible` values so that the divisibility
+            // doesn't change.
+            worry = monkey.operation(worry) % modulus
             val tossTo = if (worry % monkey.bigDivisible == BigInteger.ZERO) {
                 monkey.trueMonkey
             } else {
@@ -250,9 +264,11 @@ fun main() {
         monkey = parseMonkey(Lines)
     }
 
+    val modulus = lcm(ArrayList(monkeys.map { m -> m.bigDivisible }))
+
     val roundsToCheck = setOf<Int>(1 ,20 ,1000 ,2000 ,3000 ,4000 ,5000 ,6000 ,7000 ,8000 ,9000 ,10000)
     for (i in 1..ROUNDS) {
-        doRound(monkeys)
+        doRound(monkeys, modulus)
         if (roundsToCheck.contains(i)) {
             print("After round $i\n")
             for (j in 0..monkeys.size - 1) {
