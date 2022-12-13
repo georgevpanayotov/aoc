@@ -1,4 +1,4 @@
-sealed class PacketData: Comparable<PacketData>
+sealed class PacketData : Comparable<PacketData>
 
 fun compareLists(lhs: ListPacketData, rhs: ListPacketData): Int {
     var i = 0
@@ -14,6 +14,12 @@ fun compareLists(lhs: ListPacketData, rhs: ListPacketData): Int {
 }
 
 class ListPacketData(val items: List<PacketData>) : PacketData() {
+    constructor(item: PacketData) : this(arrayListOf(item)) {
+    }
+
+    constructor(x: Int) : this(arrayListOf(CorePacketData(x))) {
+    }
+
     override fun toString(): String {
         var str = "["
         for (i in 0..items.size - 2) {
@@ -91,14 +97,10 @@ fun parsePacket(line: String, cursor: Cursor): PacketData? {
     }
 }
 
-fun divider(x: Int): PacketData {
-    return ListPacketData(arrayListOf(ListPacketData(arrayListOf(CorePacketData(x)))))
-}
-
 fun main() {
     var line = readLine()
-    val divider2 = divider(2)
-    val divider6 = divider(6)
+    val divider2 = ListPacketData(ListPacketData(2))
+    val divider6 = ListPacketData(ListPacketData(6))
 
     val packets = arrayListOf(divider2, divider6)
 
