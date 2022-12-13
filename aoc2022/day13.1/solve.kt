@@ -1,7 +1,20 @@
-sealed class PacketData
+sealed class PacketData: Comparable<PacketData>
+
+fun compareLists(lhs: ListPacketData, rhs: ListPacketData): Int {
+    var i = 0
+    while (i < lhs.items.size && i < rhs.items.size) {
+        val comp = lhs.items[i].compareTo(rhs.items[i])
+        if (comp != 0) {
+            return comp
+        }
+
+        i++
+    }
+    return lhs.items.size.compareTo(rhs.items.size)
+}
 
 class ListPacketData(val items: List<PacketData>) : PacketData() {
-    override fun toString(): String { 
+    override fun toString(): String {
         var str = "["
         for (i in 0..items.size - 2) {
             str += items[i].toString()
@@ -13,10 +26,22 @@ class ListPacketData(val items: List<PacketData>) : PacketData() {
         str += "]"
         return str
     }
+
+    override fun compareTo(other: PacketData): Int =
+        when (other) {
+            is ListPacketData -> compareLists(this, other)
+            is CorePacketData -> compareLists(this, ListPacketData(arrayListOf(other)))
+        }
 }
 
 class CorePacketData(val item: Int) : PacketData() {
     override fun toString(): String = "$item"
+
+    override fun compareTo(other: PacketData): Int =
+        when (other) {
+            is ListPacketData -> compareLists(ListPacketData(arrayListOf(this)), other)
+            is CorePacketData -> this.item.compareTo(other.item)
+        }
 }
 
 class Cursor(var pos: Int)
@@ -69,16 +94,20 @@ fun parsePacket(line: String, cursor: Cursor): PacketData? {
 fun main() {
     var line = readLine()
     var score = 0
+    var pair = 1
     while (line != null) {
         val leftPacket = parsePacket(line, Cursor(0))
-        print("$leftPacket\n")
         line = readLine()
 
         val rightPacket = parsePacket(line!!, Cursor(0))
-        print("$rightPacket\n\n")
         readLine()
 
+        if (leftPacket!!.compareTo(rightPacket!!) < 0) {
+            score += pair
+        }
+
         line = readLine()
+        pair++
     }
-    print(score)
+    print("$score\n")
 }
