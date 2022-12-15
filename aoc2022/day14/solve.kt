@@ -88,8 +88,17 @@ fun createGrid(rockLines: List<List<Pair<Int, Int>>>): Pair<Int, MutableList<Mut
         }
     }
 
-    val xRange = maxX!! - minX!! + 1
-    val yRange = maxY!! + 1
+    if (minX == null) { error("minX") }
+    if (minY == null) { error("minY") }
+    if (maxX == null) { error("maxX") }
+    if (maxY == null) { error("maxY") }
+
+    maxY+= 2
+    minX -= 2 * maxY
+    maxX += 2 * maxY
+
+    val xRange = maxX - minX + 1
+    val yRange = maxY + 1
 
     val grid = arrayListOf<MutableList<Char>>()
     for (y in 1..yRange) {
@@ -190,8 +199,49 @@ fun part1(rockLines: List<List<Pair<Int, Int>>>) {
 
 }
 
+fun part2(rockLines: List<List<Pair<Int, Int>>>) {
+    val (minX, grid) = createGrid(rockLines)
+
+    val maxY = grid.size - 1
+    for(i in 0..grid[maxY].size - 1) {
+        grid[maxY][i] = '#'
+    }
+
+    printGrid(grid)
+
+    val startX = START_X - minX
+
+    var score = 0
+    while (grid[0][startX] != 'o') {
+        var moved = true
+        var point = Pair(startX, 0)
+
+        while(moved) {
+            val next = moveDown(grid, point)
+            if (next == null) {
+                error("Failed. Build it bigger next time.")
+            }
+
+            if (next == point) {
+                moved = false
+                score++
+
+                val (x, y) = point
+                grid[y][x] = 'o'
+            } else {
+                point = next
+            }
+        }
+    }
+    printGrid(grid)
+    print("$score\n")
+
+}
+
 fun main() {
     val rockLines = parseRockLines()
     part1(rockLines)
+
+    part2(rockLines)
 
 }
