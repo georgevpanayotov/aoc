@@ -1,8 +1,8 @@
 all:
-	kotlinc solve.kt
+	kotlinc solve.kt ../utils/Lines.kt ../utils/Scanners.kt -d bin
 
 run:
-	kotlin SolveKt < input
+	kotlin -cp bin SolveKt < input
 
 sample:
-	kotlin SolveKt < sample_input
+	kotlin -cp bin SolveKt < sample_input
