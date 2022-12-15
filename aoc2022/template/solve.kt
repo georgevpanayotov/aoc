@@ -1,9 +1,13 @@
-fun main() {
-    var line = readLine()
-    var score = 0
-    while (line != null) {
+import net.panayotov.util.Scanners
+import net.panayotov.util.Lines
 
-        line = readLine()
+import java.util.Scanner
+
+fun main() {
+    var score = 0
+    for (line in Lines) {
+
     }
+
     print(score)
 }
