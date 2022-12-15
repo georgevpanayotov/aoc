@@ -1,5 +1,7 @@
 import java.util.Scanner
 
+const val START_X = 500
+
 object Lines : Iterator<Scanner> {
     private var line: Scanner? = null
     override fun next(): Scanner {
@@ -57,7 +59,7 @@ operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>): Pair<Int, Int> =
 fun Pair<Int, Int>.unit(): Pair<Int, Int> =
     Pair(first.coerceIn(-1, 1), second.coerceIn(-1, 1))
 
-fun createGrid(rockLines: List<List<Pair<Int, Int>>>): Pair<Int, List<List<Char>>> {
+fun createGrid(rockLines: List<List<Pair<Int, Int>>>): Pair<Int, MutableList<MutableList<Char>>> {
     var minX: Int? = null
     var minY: Int? = null
 
@@ -89,7 +91,7 @@ fun createGrid(rockLines: List<List<Pair<Int, Int>>>): Pair<Int, List<List<Char>
     val xRange = maxX!! - minX!! + 1
     val yRange = maxY!! + 1
 
-    val grid = arrayListOf<ArrayList<Char>>()
+    val grid = arrayListOf<MutableList<Char>>()
     for (y in 1..yRange) {
         val gridLine = arrayListOf<Char>()
         for (x in 1..xRange) {
@@ -111,6 +113,7 @@ fun createGrid(rockLines: List<List<Pair<Int, Int>>>): Pair<Int, List<List<Char>
                     grid[iRock.second][iRock.first - minX] = '#'
                     iRock += diff
                 }
+                grid[rock.second][rock.first - minX] = '#'
             }
             lastRock = rock
         }
@@ -129,10 +132,62 @@ fun printGrid(grid: List<List<Char>>) {
     }
 }
 
+fun moveDown(grid: List<List<Char>>, pos: Pair<Int, Int>): Pair<Int, Int>? {
+    var (x, y) = pos
+
+    if (y >= grid.size - 1) {
+        return null
+    }
+
+    if (x < 0 || x >= grid[y].size) {
+        return null
+    }
+
+    if (grid[y + 1][x] == '.') {
+        return Pair(x, y + 1)
+    } else if (x == 0 || grid[y + 1][x - 1] == '.') {
+        return Pair(x - 1, y + 1)
+    } else if (x == grid[y].size - 1 || grid[y + 1][x + 1] == '.') {
+        return Pair(x + 1, y + 1)
+    } else {
+        return Pair(x, y)
+    }
+
+
+}
+
 fun part1(rockLines: List<List<Pair<Int, Int>>>) {
     val (minX, grid) = createGrid(rockLines)
-    print("$minX\n")
     printGrid(grid)
+
+    val startX = START_X - minX
+
+    var abyss = false
+    var score = 0
+    while (!abyss) {
+        var moved = true
+        var point = Pair(startX, 0)
+
+        while(moved) {
+            val next = moveDown(grid, point)
+            if (next == null) {
+                abyss = true
+                break
+            } else if (next == point) {
+                moved = false
+                score++
+
+                val (x, y) = point
+                grid[y][x] = 'o'
+
+            } else {
+                point = next
+            }
+        }
+    }
+    printGrid(grid)
+    print("$score\n")
+
 }
 
 fun main() {
