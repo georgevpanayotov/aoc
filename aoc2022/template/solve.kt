@@ -1,5 +1,6 @@
 import net.panayotov.util.Scanners
 import net.panayotov.util.Lines
+import net.panayotov.util.findMinMax
 
 import java.util.Scanner
 
