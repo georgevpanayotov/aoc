@@ -3,14 +3,14 @@ import net.panayotov.util.Scanners
 
 const val TUNING_FACTOR = 4000000
 
-infix fun Pair<Int, Int>.manhattan(other: Pair<Int, Int>) =
+infix fun Pair<Long, Long>.manhattan(other: Pair<Long, Long>) =
     Math.abs(first - other.first) + Math.abs(second - other.second)
 
-fun Pair<Int, Int>.tuningFrequency(): Int = first * TUNING_FACTOR + second
+fun Pair<Long, Long>.tuningFrequency(): Long = first * TUNING_FACTOR + second
 
-fun findMax(beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>): Pair<Int, Int> {
-    var maxX: Int? = null
-    var maxY: Int? = null
+fun findMax(beaconMap: Map<Pair<Long, Long>, Pair<Long, Long>>): Pair<Long, Long> {
+    var maxX: Long? = null
+    var maxY: Long? = null
 
     for (entry in beaconMap.entries) {
         val sensor = entry.key
@@ -31,9 +31,9 @@ fun findMax(beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>): Pair<Int, Int> {
     return Pair(maxX!!, maxY!!)
 }
 
-fun findMin(beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>): Pair<Int, Int> {
-    var minX: Int? = null
-    var minY: Int? = null
+fun findMin(beaconMap: Map<Pair<Long, Long>, Pair<Long, Long>>): Pair<Long, Long> {
+    var minX: Long? = null
+    var minY: Long? = null
 
     for (entry in beaconMap.entries) {
         val sensor = entry.key
@@ -54,41 +54,46 @@ fun findMin(beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>): Pair<Int, Int> {
     return Pair(minX!!, minY!!)
 }
 
-fun part1(row: Int, beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>, beaconSet: Set<Pair<Int, Int>>) {
+fun isPossible(currentPoint: Pair<Long, Long>, beaconMap: Map<Pair<Long, Long>, Pair<Long, Long>>, beaconSet: Set<Pair<Long, Long>>): Boolean {
+    if (beaconSet.contains(currentPoint)) {
+        return false
+    }
+
+    if (beaconMap.containsKey(currentPoint)) {
+        return false
+    }
+
+    for (entry in beaconMap.entries) {
+        val sensor = entry.key
+        val beacon = entry.value
+
+        val distance = sensor manhattan beacon
+
+        if (sensor manhattan currentPoint <= distance) {
+            return false
+        }
+    }
+
+    return true
+}
+
+fun part1(row: Long, beaconMap: Map<Pair<Long, Long>, Pair<Long, Long>>, beaconSet: Set<Pair<Long, Long>>) {
     val max = findMax(beaconMap)
     val min = findMin(beaconMap)
     var score = 0
 
     for (x in min.first..max.first) {
-        val currentPoint = Pair(x, row)
-
-        if (beaconSet.contains(currentPoint)) {
-            continue
-        }
-
-        if (beaconMap.containsKey(currentPoint)) {
-            continue
-        }
-
-        for (entry in beaconMap.entries) {
-            val sensor = entry.key
-            val beacon = entry.value
-
-            val distance = sensor manhattan beacon
-
-            if (sensor manhattan currentPoint <= distance) {
-                score++
-                break
-            }
+        if (!isPossible(Pair(x, row), beaconMap, beaconSet)) {
+            score++
         }
     }
 
     print("$score\n")
 }
 
-fun part2(max: Int, beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>, beaconSet: Set<Pair<Int, Int>>) {
+fun part2(max: Long, beaconMap: Map<Pair<Long, Long>, Pair<Long, Long>>, beaconSet: Set<Pair<Long, Long>>) {
     for (x in 0..max) {
-        var y = 0
+        var y = 0L
         while (y <= max) {
             val currentPoint = Pair(x, y)
 
@@ -103,7 +108,7 @@ fun part2(max: Int, beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>, beaconSet: S
             }
 
             var possible = true
-            var maxNewY: Int? = null
+            var maxNewY: Long? = null
             for (entry in beaconMap.entries) {
                 val sensor = entry.key
                 val beacon = entry.value
@@ -136,11 +141,40 @@ fun part2(max: Int, beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>, beaconSet: S
     }
 }
 
+fun part2_take2(max: Long, beaconMap: Map<Pair<Long, Long>, Pair<Long, Long>>, beaconSet: Set<Pair<Long, Long>>) {
+    for (entry in beaconMap.entries) {
+        val sensor = entry.key
+        val beacon = entry.value
+
+        val targetDistance = (sensor manhattan beacon) + 1
+
+        val minX = (sensor.first - targetDistance).coerceIn(0, max)
+        val maxX = (sensor.first + targetDistance).coerceIn(0, max)
+
+        for (x in minX..maxX) {
+            val bottomY = (sensor.second - targetDistance + Math.abs(x - sensor.first)).coerceIn(0, max)
+            val topY = (sensor.second + targetDistance - Math.abs(x - sensor.first)).coerceIn(0, max)
+
+            val bottom = Pair(x, bottomY)
+            val top = Pair(x, topY)
+            if (isPossible(bottom, beaconMap, beaconSet)) {
+                print("${bottom.tuningFrequency()}\n")
+                return
+            }
+            if (isPossible(top, beaconMap, beaconSet)) {
+                print("${top.tuningFrequency()}\n")
+                return
+            }
+        }
+
+    }
+}
+
 fun main() {
-    val row = Scanners.next().nextInt()
-    val max = Scanners.next().nextInt()
-    val beaconMap = mutableMapOf<Pair<Int, Int>, Pair<Int, Int>>()
-    val beaconSet = mutableSetOf<Pair<Int, Int>>()
+    val row = Scanners.next().nextLong()
+    val max = Scanners.next().nextLong()
+    val beaconMap = mutableMapOf<Pair<Long, Long>, Pair<Long, Long>>()
+    val beaconSet = mutableSetOf<Pair<Long, Long>>()
 
     for (line in Scanners) {
         line.next()
@@ -150,8 +184,8 @@ fun main() {
         xStr = xStr.substring(0, xStr.length - 1)
         yStr = yStr.substring(0, yStr.length - 1)
 
-        val sensorX = xStr.split('=')[1].toInt()
-        val sensorY = yStr.split('=')[1].toInt()
+        val sensorX = xStr.split('=')[1].toLong()
+        val sensorY = yStr.split('=')[1].toLong()
 
         line.next()
         line.next()
@@ -162,12 +196,12 @@ fun main() {
         yStr = line.next()
         xStr = xStr.substring(0, xStr.length - 1)
 
-        val beacon = Pair(xStr.split('=')[1].toInt(), yStr.split('=')[1].toInt())
+        val beacon = Pair(xStr.split('=')[1].toLong(), yStr.split('=')[1].toLong())
 
         beaconMap[Pair(sensorX, sensorY)] = beacon
         beaconSet.add(beacon)
     }
 
     part1(row, beaconMap, beaconSet)
-    part2(max, beaconMap, beaconSet)
+    part2_take2(max, beaconMap, beaconSet)
 }
