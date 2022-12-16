@@ -1,8 +1,12 @@
 
 import net.panayotov.util.Scanners
 
+const val TUNING_FACTOR = 4000000
+
 infix fun Pair<Int, Int>.manhattan(other: Pair<Int, Int>) =
     Math.abs(first - other.first) + Math.abs(second - other.second)
+
+fun Pair<Int, Int>.tuningFrequency(): Int = first * TUNING_FACTOR + second
 
 fun findMax(beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>): Pair<Int, Int> {
     var maxX: Int? = null
@@ -77,14 +81,64 @@ fun part1(row: Int, beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>, beaconSet: S
                 break
             }
         }
-
     }
 
     print("$score\n")
 }
 
+fun part2(max: Int, beaconMap: Map<Pair<Int, Int>, Pair<Int, Int>>, beaconSet: Set<Pair<Int, Int>>) {
+    for (x in 0..max) {
+        var y = 0
+        while (y <= max) {
+            val currentPoint = Pair(x, y)
+
+            if (beaconSet.contains(currentPoint)) {
+                y++
+                continue
+            }
+
+            if (beaconMap.containsKey(currentPoint)) {
+                y++
+                continue
+            }
+
+            var possible = true
+            var maxNewY: Int? = null
+            for (entry in beaconMap.entries) {
+                val sensor = entry.key
+                val beacon = entry.value
+
+                val distance = sensor manhattan beacon
+
+                if (sensor manhattan currentPoint <= distance) {
+                    if (y < sensor.second) {
+                        val newY = 2 * sensor.second - y
+                        if (maxNewY == null || newY > maxNewY) {
+                            maxNewY = newY
+                        }
+                    }
+
+                    possible = false
+                }
+            }
+
+            if (possible) {
+                print("${currentPoint.tuningFrequency()}\n")
+                return
+            }
+
+            if (maxNewY != null) {
+                y = maxNewY
+            } else {
+                y++
+            }
+        }
+    }
+}
+
 fun main() {
     val row = Scanners.next().nextInt()
+    val max = Scanners.next().nextInt()
     val beaconMap = mutableMapOf<Pair<Int, Int>, Pair<Int, Int>>()
     val beaconSet = mutableSetOf<Pair<Int, Int>>()
 
@@ -115,4 +169,5 @@ fun main() {
     }
 
     part1(row, beaconMap, beaconSet)
+    part2(max, beaconMap, beaconSet)
 }
