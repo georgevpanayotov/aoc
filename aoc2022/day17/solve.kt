@@ -62,6 +62,7 @@ class Pile {
     // Level of the lowest row saved.
     var level: Long = 1
     var maxOccupiedLevels = arrayListOf<Long?>(null, null, null, null, null, null, null)
+    var pending: RockShape? = null
 
     init {
         addBlanks(3)
@@ -104,6 +105,8 @@ class Pile {
             }
         }
 
+        pending = rock
+
         return true
     }
 
@@ -117,13 +120,27 @@ class Pile {
                 maxOccupiedLevels[x.toInt()] = point.second
             }
         }
+
+        pending = null
     }
 
     override fun toString(): String {
         var str = ""
         var y = grid.size - 1
         while (y >= 0) {
-            for (ch in grid[y]) {
+            for (x in 0..grid[y].size - 1) {
+                var ch = grid[y][x]
+                val pending = pending
+                if (pending != null) {
+                    for (point in pending.points) {
+                        val (pointX, pointY) = adjust(point)
+                        if (pointX == x.toLong() && pointY == y.toLong()) {
+                            ch = '@'
+                            break
+                        }
+                    }
+                }
+
                 str += ch
             }
             str += '\n'
@@ -228,6 +245,10 @@ fun main() {
 
             // check if fits
             if (pile.fits(newRock)) {
+                print("\u001b[2J")
+                print("$pile")
+                Thread.sleep(200)
+
                 rock = newRock
             }
 
@@ -235,9 +256,16 @@ fun main() {
             newRock = rock + DOWN
             if (pile.fits(newRock)) {
                 rock = newRock
+                print("\u001b[2J")
+                print("$pile")
+                Thread.sleep(200)
+
             } else {
                 // The old rock NOT the new one because it didn't fit.
                 pile.commit(rock)
+                print("\u001b[2J")
+                print("$pile")
+                Thread.sleep(200)
 
                 val transform = if (prevRock != null) {
                     rock.transformFrom(prevRock)
