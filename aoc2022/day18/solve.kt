@@ -166,6 +166,28 @@ fun computeSurfaceArea(blockMap: Map<Triple<Int, Int, Int>, BlockRecord>): Int {
     return score
 }
 
+fun animate(blockMap: Map<Triple<Int, Int, Int>, BlockRecord>) {
+    val (min, max) = findMinMaxTriple(blockMap.keys.iterator())!!
+
+    for (z in min.third..max.third) {
+        print("\u001b[2J")
+
+        for (y in min.second..max.second) {
+            for (x in min.first..max.first) {
+                val ch =
+                    if (blockMap.containsKey(Triple(x, y, z))) {
+                        '#'
+                    } else {
+                        ' '
+                    }
+                print(ch)
+            }
+            print("\n")
+        }
+        Thread.sleep(200)
+    }
+}
+
 fun main() {
     val blockMap = mutableMapOf<Triple<Int, Int, Int>, BlockRecord>()
     for (line in Scanners) {
@@ -176,6 +198,8 @@ fun main() {
         val point = Triple(x, y, z)
         blockMap[point] = BlockRecord(point)
     }
+
+    animate(blockMap)
 
     simplify(blockMap)
 
