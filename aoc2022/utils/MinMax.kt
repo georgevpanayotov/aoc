@@ -27,3 +27,39 @@ fun findMinMax(pairs: Iterator<Pair<Long, Long>>): Pair<Pair<Long, Long>, Pair<L
     return Pair(Pair(minX, minY), Pair(maxX, maxY))
 
 }
+
+fun findMinMaxTriple(triples: Iterator<Triple<Int, Int, Int>>): Pair<Triple<Int, Int, Int>, Triple<Int, Int, Int>>? {
+    var minX: Int? = null
+    var minY: Int? = null
+    var minZ: Int? = null
+    var maxX: Int? = null
+    var maxY: Int? = null
+    var maxZ: Int? = null
+
+    for (triple in triples) {
+        if (minX == null || triple.first < minX) {
+            minX = triple.first
+        }
+        if (minY == null || triple.second < minY) {
+            minY = triple.second
+        }
+        if (minZ == null || triple.third < minZ) {
+            minZ = triple.third
+        }
+        if (maxX == null || triple.first > maxX) {
+            maxX = triple.first
+        }
+        if (maxY == null || triple.second > maxY) {
+            maxY = triple.second
+        }
+        if (maxZ == null || triple.third > maxZ) {
+            maxZ = triple.third
+        }
+    }
+    if (minX == null || minY == null || minZ == null || maxX == null || maxY == null || maxZ == null) {
+        return null
+    }
+
+    return Pair(Triple(minX, minY, minZ), Triple(maxX, maxY, maxZ))
+
+}
