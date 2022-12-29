@@ -173,6 +173,7 @@ fun animate(blockMap: Map<Triple<Int, Int, Int>, BlockRecord>) {
         print("\u001b[2J")
 
         for (y in min.second..max.second) {
+            print("\u001b[${y + 5};5H")
             for (x in min.first..max.first) {
                 val ch =
                     if (blockMap.containsKey(Triple(x, y, z))) {
@@ -182,10 +183,10 @@ fun animate(blockMap: Map<Triple<Int, Int, Int>, BlockRecord>) {
                     }
                 print(ch)
             }
-            print("\n")
         }
-        Thread.sleep(200)
+        Thread.sleep(100)
     }
+    print("\n")
 }
 
 fun main() {
