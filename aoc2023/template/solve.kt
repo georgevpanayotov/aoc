@@ -10,5 +10,5 @@ fun main() {
 
     }
 
-    print(score)
+    println("Answer = $score")
 }
