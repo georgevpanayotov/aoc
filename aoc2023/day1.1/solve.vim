@@ -4,4 +4,6 @@
 %s/^/+ /
 normal ggVGJ
 normal 0dw
-.!bc -q
+normal 0y$
+let @" = eval(@")
+normal Vp
