@@ -4,7 +4,11 @@ operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + othe
 
 // Represents a number on a particular row ranging from min to max - 1.
 // i.e. grid[row].substring(min, max) is the number.
-data class NumberRange(val row: Int, val min: Int, val max: Int)
+data class NumberRange(val row: Int, val min: Int, val max: Int) {
+    fun getNumber(grid: List<String>): Int {
+        return grid[row].substring(min, max).toInt()
+    }
+}
 
 val vectors = listOf(
     Pair(-1, -1),
@@ -97,7 +101,7 @@ fun main() {
                 if (numberSet.size == 2) {
                     var ratio = 1
                     for (numberRange in numberSet) {
-                        ratio = ratio * grid[numberRange.row].substring(numberRange.min, numberRange.max).toInt()
+                        ratio = ratio * numberRange.getNumber(grid)
                     }
                     score += ratio
                 }
