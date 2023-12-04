@@ -45,15 +45,13 @@ fun main() {
             continue
         }
 
-        for (j in 1..count) {
-            for (offset in 1..winningCount) {
-                val offsetCount = cardCount[i + offset]
-                if (offsetCount == null) {
-                    continue
-                }
-
-                cardCount[i + offset] = offsetCount + 1
+        for (offset in 1..winningCount) {
+            val offsetCount = cardCount[i + offset]
+            if (offsetCount == null) {
+                continue
             }
+
+            cardCount[i + offset] = offsetCount + count
         }
     }
 
