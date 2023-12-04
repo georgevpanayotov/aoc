@@ -11,3 +11,5 @@ cp_it() {
 cp_it ./input
 cp_it ./sample_input
 cp_it ./solve.kt
+
+git add *
