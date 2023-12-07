@@ -8,33 +8,38 @@ data class Overlap(val range: ResourceRange, val preCount: Long, val postCount: 
     fun disjoint() = preCount == range.end - range.start + 1
 
     fun preRange(): ResourceRange? = if (preCount > 0) {
-        ResourceRange(range.type, range.start, range.start + preCount - 1)
+        ResourceRange(range.start, range.start + preCount - 1)
     } else {
         null
     }
 
     fun postRange(): ResourceRange? = if (postCount > 0) {
-        ResourceRange(range.type, range.end - postCount + 1, range.end)
+        ResourceRange(range.end - postCount + 1, range.end)
     } else {
         null
     }
 
     fun rangeToConvert(): ResourceRange? = if (!disjoint()) {
-        ResourceRange(range.type, range.start + preCount, range.end - postCount)
+        ResourceRange(range.start + preCount, range.end - postCount)
     } else {
         null
     }
 }
 
-data class ResourceRange(val type: String, val start: Long, val end: Long) {
+data class ResourceRange(val start: Long, val end: Long) {
     fun inRange(point: Long): Boolean = point >= start && point <= end
 }
 
 data class MappingRule(val sourceStart: Long, val destStart: Long, val length: Long) {
-    fun convert(incoming: Long): Long? = if (matches(incoming)) {
-        incoming + diff()
-    } else {
-        null
+    fun convertRange(range: ResourceRange): ResourceRange? {
+        val newStart = convert(range.start)
+        val newEnd = convert(range.end)
+
+        return if (newStart != null && newEnd != null) {
+            ResourceRange(newStart, newEnd)
+        } else {
+            null
+        }
     }
 
     fun getOverlap(range: ResourceRange): Overlap {
@@ -74,6 +79,13 @@ data class MappingRule(val sourceStart: Long, val destStart: Long, val length: L
         get(): Long = sourceStart + length - 1
     private fun matches(resource: Long): Boolean = resource >= sourceStart && resource < sourceStart + length
     private fun diff() = destStart - sourceStart
+
+    private fun convert(incoming: Long): Long? = if (matches(incoming)) {
+        incoming + diff()
+    } else {
+        null
+    }
+
 }
 
 data class Mapping(val source: String, val dest: String, val rules: List<MappingRule>) {
@@ -94,18 +106,14 @@ data class Mapping(val source: String, val dest: String, val rules: List<Mapping
                     disjoint = false
                     overlap.preRange()?.let { remainingRanges.add(it) }
                     overlap.postRange()?.let { remainingRanges.add(it) }
-
-                    val rangeToConvert = overlap.rangeToConvert()
-                    if (rangeToConvert != null) {
-                        convertedRanges.add(ResourceRange(dest, rule.convert(rangeToConvert.start)!!, rule.convert(rangeToConvert.end)!!))
-                    }
+                    overlap.rangeToConvert()?.let(rule::convertRange)?.apply(convertedRanges::add)
 
                     break
                 }
             }
 
             if (disjoint) {
-                convertedRanges.add(ResourceRange(dest, current.start, current.end))
+                convertedRanges.add(ResourceRange(current.start, current.end))
             }
         }
 
@@ -170,7 +178,7 @@ fun seedRanges(seeds: List<Long>): List<ResourceRange> {
     val outSeeds = mutableListOf<ResourceRange>()
 
     while (i < seeds.size) {
-        outSeeds.add(ResourceRange("seed", seeds[i], seeds[i] + seeds[i + 1] - 1))
+        outSeeds.add(ResourceRange(seeds[i], seeds[i] + seeds[i + 1] - 1))
         i += 2
     }
 
