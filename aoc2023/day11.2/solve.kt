@@ -51,26 +51,27 @@ fun findGalaxies(grid: List<String>): List<Pair<Int, Int>> {
     return galaxies.toList()
 }
 
-fun abs(value: Int): Int = if (value > 0) value else -value
-
-fun min(a: Int, b: Int): Int = if (a > b) b else a
-fun max(a: Int, b: Int): Int = if (a > b) a else b
+fun range(a: Int, b: Int): IntRange = if (a > b) b..<a else a..<b
 
 fun getDistance(grid: List<String>, size: Int, left: Pair<Int, Int>, right: Pair<Int, Int>): Long {
-    var distance: Long = (abs(left.first - right.first) + abs(left.second - right.second)).toLong()
+    var distance = 0L
 
     // Since the distances are just following the "Manhattan" distance we can just add the number of
     // 'M' rows and 'M' columns times (size - 1). Minus 1 because there is already 1 column/row
     // there.
-    for (i in min(left.first, right.first)..max(left.first, right.first)) {
+    for (i in range(left.first, right.first)) {
         if (grid[i][0] == 'M') {
-            distance += size - 1
+            distance += size
+        } else {
+            distance += 1
         }
     }
 
-    for (j in min(left.second, right.second)..max(left.second, right.second)) {
+    for (j in range(left.second, right.second)) {
         if (grid[0][j] == 'M') {
-            distance += size - 1
+            distance += size
+        } else {
+            distance += 1
         }
     }
 
