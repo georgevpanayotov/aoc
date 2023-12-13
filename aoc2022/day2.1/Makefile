@@ -1,0 +1,3 @@
+
+all:
+	kotlinc solve.kt
