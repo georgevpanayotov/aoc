@@ -134,7 +134,7 @@ data class SpringRow(val springData: List<SpringState>, val ranges: List<Int>) {
     fun countUnknown() = springData.filter({ it == SpringState.UNKNOWN }).size
 }
 
-fun readRows(): List<SpringRow> {
+fun readRows(unfoldRows: Boolean): List<SpringRow> {
     val rows = mutableListOf<SpringRow>()
 
     for (line in Lines) {
@@ -146,10 +146,12 @@ fun readRows(): List<SpringRow> {
         val bigSpringData = springData.toMutableList()
         val bigRanges = ranges.toMutableList()
 
-        for (i in 1..4) {
-            bigSpringData.add(SpringState.UNKNOWN)
-            bigSpringData.addAll(springData)
-            bigRanges.addAll(ranges)
+        if (unfoldRows) {
+            for (i in 1..4) {
+                bigSpringData.add(SpringState.UNKNOWN)
+                bigSpringData.addAll(springData)
+                bigRanges.addAll(ranges)
+            }
         }
 
         rows.add(SpringRow(bigSpringData, bigRanges))
@@ -158,9 +160,15 @@ fun readRows(): List<SpringRow> {
     return rows.toList()
 }
 
-fun main() {
+fun main(args: Array<String>) {
     var score = 0L
-    val rows = readRows()
+    val unfoldRows = if (args.size > 0) {
+        args[0] != "-F"
+    } else {
+        true
+    }
+
+    val rows = readRows(unfoldRows)
 
     for (row in rows) {
         val cache = mutableMapOf<RecurrenceState, Long>()
