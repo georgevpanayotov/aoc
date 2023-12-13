@@ -6,3 +6,9 @@ run:
 
 sample:
 	kotlin -cp bin SolveKt < sample_input
+
+runF:
+	kotlin -cp bin SolveKt -F < input
+
+sampleF:
+	kotlin -cp bin SolveKt -F < sample_input
