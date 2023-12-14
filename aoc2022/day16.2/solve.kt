@@ -11,16 +11,6 @@ enum class ActionSubject {
     ELEPHANT
 }
 
-sealed interface Action {
-    val valve: Valve
-    val index: Int
-}
-
-data class MoveAction(override val valve: Valve, override val index: Int, val nextValveName: String, val subject: ActionSubject): Action
-
-data class OpenValveAction(override val valve: Valve, override val index: Int): Action
-
-
 data class RecurrenceState(
     val position: String,
     val elephantPosition: String,
@@ -117,7 +107,6 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, Long>, valves: List<Valve>, s
     // A minute will pass as we do our turn.
     val pressure = releasePressure(valves, state)
 
-    // TODO: What TODO? Still too much mem usage even with memoization + this early return that was hinted at.
     if (state.allOpen(valves)) {
         val allPressure = state.allPressure(pressure)
         cache[state] = allPressure
@@ -150,61 +139,56 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, Long>, valves: List<Valve>, s
         error("Valve ${state.elephantPosition} not found")
     }
 
-    val humanActions = getActions(valve, valveIndex, ActionSubject.HUMAN)
-    val elephantActions = getActions(elephantValve, elephantValveIndex, ActionSubject.ELEPHANT)
-
     val tickedState = state.tick()
 
     var max = 0L
 
-    for (action in humanActions) {
-        for (elephantAction in elephantActions) {
-            doAction(tickedState, action)?.let {
-                doAction(it, elephantAction)
+    for (i in -1..<valve.neighbors.size) {
+        for (j in -1..<elephantValve.neighbors.size) {
+            doActions(i, tickedState, valve, valveIndex, ActionSubject.HUMAN)?.let {
+                doActions(j, it, elephantValve, elephantValveIndex, ActionSubject.ELEPHANT)
             }?.let {
-                if (it.position != it.elephantPosition) {
-                    val flow = findMaxFlow(cache, valves, it)
-                    if (flow > max) {
-                        max = flow
-                    }
+                val flow = findMaxFlow(cache, valves, it)
+                if (flow > max) {
+                    max = flow
                 }
             }
         }
     }
+
 
     val result = pressure + max
     cache[state] = result
     return result
 }
 
-fun doAction(state: RecurrenceState, action: Action): RecurrenceState? {
-    var newState: MutableRecurrenceState? = state.toMutable()
-
-    when (action) {
-        is OpenValveAction -> if (!state.isOpen(action.index) && action.valve.rate > 0) {
-            newState!!.openValve(action.index)
-        } else {
-            newState = null
-        }
-        is MoveAction -> when (action.subject) {
-            ActionSubject.HUMAN -> newState!!.position = action.nextValveName
-            ActionSubject.ELEPHANT -> newState!!.elephantPosition = action.nextValveName
-        }
+fun doActions(neighborIndex: Int, state: RecurrenceState, valve: Valve, index: Int,
+              subject: ActionSubject): RecurrenceState? {
+    if (neighborIndex < 0) {
+        return maybeOpenValve(state, valve, index)
+    } else {
+        return move(state, valve.neighbors[neighborIndex], subject)
     }
-
-    return newState?.toRecurrence()
 }
 
-fun getActions(valve: Valve, index: Int, subject: ActionSubject): List<Action> {
-    var actions = mutableListOf<Action>()
-
-    actions.add(OpenValveAction(valve, index))
-
-    for (neighbor in valve.neighbors) {
-        actions.add(MoveAction(valve, index, neighbor, subject))
+fun maybeOpenValve(state: RecurrenceState, valve: Valve, index: Int): RecurrenceState? {
+    var newState = state.toMutable()
+    if (!state.isOpen(index) && valve.rate > 0) {
+        newState.openValve(index)
+        return newState.toRecurrence()
+    } else {
+        return null
     }
+}
 
-    return actions.toList()
+fun move(state: RecurrenceState, neighbor: String, subject: ActionSubject): RecurrenceState? {
+    var newState = state.toMutable()
+    when (subject) {
+            ActionSubject.HUMAN -> newState.position = neighbor
+            ActionSubject.ELEPHANT -> newState.elephantPosition = neighbor
+        }
+
+    return newState.toRecurrence()
 }
 
 fun main() {
