@@ -100,6 +100,10 @@ data class MutableRecurrenceState(
                         openValves)
 
     fun openValve(valveIndex: Int) {
+        if (toRecurrence().isOpen(valveIndex)) {
+            error("Valve $valveIndex already open")
+        }
+
         openValves = openValves or (1L shl (valveIndex + 1))
     }
 }
@@ -237,7 +241,7 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, Long>, valves: List<Valve>, a
     if (nextState.elephantDestination != null) {
         if (nextState.elephantDestination == nextState.elephantPosition) {
             nextState = nextState.modified {
-                openValve(valveIndex)
+                openValve(elephantValveIndex)
                 elephantDestination = null
             }
         } else {
@@ -265,7 +269,11 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, Long>, valves: List<Valve>, a
 
         if (humanMoved) {
             for (i in 0..<valves.size) {
-                if(nextState.isOpen(i) || valves[i].rate == 0L) {
+                if (nextState.isOpen(i) || valves[i].rate == 0L) {
+                    continue
+                }
+
+                if (nextState.destination == valves[i].name) {
                     continue
                 }
 
@@ -278,7 +286,11 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, Long>, valves: List<Valve>, a
             }
         } else if (elephantMoved) {
             for (i in 0..<valves.size) {
-                if(nextState.isOpen(i) || valves[i].rate == 0L) {
+                if (nextState.isOpen(i) || valves[i].rate == 0L) {
+                    continue
+                }
+
+                if (nextState.elephantDestination == valves[i].name) {
                     continue
                 }
 
@@ -291,7 +303,7 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, Long>, valves: List<Valve>, a
             }
         } else if (potentialCount >= 2) {
             for (i in 0..<valves.size) {
-                if(nextState.isOpen(i) || valves[i].rate == 0L) {
+                if (nextState.isOpen(i) || valves[i].rate == 0L) {
                     continue
                 }
                 for (j in 0..<valves.size) {
