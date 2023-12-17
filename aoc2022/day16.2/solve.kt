@@ -43,11 +43,11 @@ data class MutableRecurrenceState(
 }
 
 // How much is released in one minute.
-fun tick(valveList: List<Valve>, state: RecurrenceState): Long {
+fun tick(valveList: List<Valve>, noPressure: Set<String>, state: RecurrenceState): Long {
     var score = 0L
 
     for (i in 0..<valveList.size) {
-        if (state.isOpen(i)) {
+        if (state.isOpen(i) && !noPressure.contains(valveList[i].name)) {
             score += valveList[i].rate
         }
     }
@@ -102,7 +102,7 @@ fun findValve(name: String, valves: List<Valve>): Pair<Int, Valve> {
 
 typealias FlowResult = Pair<List<String>, Long>
 
-fun findMaxFlow(cache: MutableMap<RecurrenceState, FlowResult>, valves: List<Valve>, state: RecurrenceState): FlowResult {
+fun findMaxFlow(cache: MutableMap<RecurrenceState, FlowResult>, valves: List<Valve>, noPressure: Set<String>, state: RecurrenceState): FlowResult {
     if (state.minutesLeft < 1) {
         return Pair(listOf<String>(), 0L)
     }
@@ -113,7 +113,7 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, FlowResult>, valves: List<Val
     }
 
     // A minute will pass as we do our turn.
-    val ticked = tick(valves, state)
+    val ticked = tick(valves, noPressure, state)
 
     // The max flow if our current action is to open this valve.
     var valveIndex: Int? = null
@@ -134,7 +134,7 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, FlowResult>, valves: List<Val
         newState.minutesLeft--
         newState.openValve(valveIndex)
 
-        findMaxFlow(cache, valves, newState.toRecurrence())
+        findMaxFlow(cache, valves, noPressure, newState.toRecurrence())
     } else {
         // It's already open so we can't do anything.
         Pair(listOf<String>(), 0L)
@@ -150,7 +150,7 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, FlowResult>, valves: List<Val
         newState.position = neighbor
         newState.minutesLeft--
 
-        val flow = findMaxFlow(cache, valves, newState.toRecurrence())
+        val flow = findMaxFlow(cache, valves, noPressure, newState.toRecurrence())
         if (flow.second > move.second) {
             move = flow
         }
@@ -168,14 +168,34 @@ fun findMaxFlow(cache: MutableMap<RecurrenceState, FlowResult>, valves: List<Val
     return result
 }
 
-fun main() {
-    val valves = readValves()
-    val score = findMaxFlow(mutableMapOf<RecurrenceState, FlowResult>(), valves, RecurrenceState.create())
-    val modifier = score.first.fold(0L) { acc, name ->
-        acc + findValve(name, valves).second.rate
+fun pow(base: Int, exp: Int): Int {
+    var result = 1
+
+    for(i in 1..exp) {
+        result *= base
     }
 
-    val elephantScore = findMaxFlow(mutableMapOf<RecurrenceState, FlowResult>(), valves, RecurrenceState.create(score.first, valves))
+    return result
+}
 
-    println("Answer = ${score.second + elephantScore.second - 26 * modifier}")
+fun main() {
+    val valves = readValves()
+    val score = findMaxFlow(mutableMapOf<RecurrenceState, FlowResult>(), valves, setOf<String>(), RecurrenceState.create())
+
+    var max = 0L
+    for (subset in 0..pow(2, score.first.size)) {
+        val opened = mutableListOf<String>()
+        for (i in 0..<score.first.size) {
+            if (subset and pow(2, i) != 0) {
+                opened.add(score.first[i])
+            }
+        }
+        val flow1 = findMaxFlow(mutableMapOf<RecurrenceState, FlowResult>(), valves, opened.toSet(), RecurrenceState.create(opened, valves))
+        val flow2 = findMaxFlow(mutableMapOf<RecurrenceState, FlowResult>(), valves, flow1.first.toSet(), RecurrenceState.create(flow1.first, valves))
+        if (flow1.second + flow2.second > max) {
+            max = flow1.second + flow2.second
+        }
+    }
+
+    println("Answer = ${max}")
 }
