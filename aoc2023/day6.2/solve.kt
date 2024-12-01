@@ -15,7 +15,7 @@ fun main() {
         it != ' '
     }.toDouble()
 
-    val low = time - sqrt(time * time - 4 * distance) / 2
-    val high = time + sqrt(time * time - 4 * distance) / 2
+    val low = time - Math.sqrt(time * time - 4 * distance) / 2
+    val high = time + Math.sqrt(time * time - 4 * distance) / 2
     println("Answer = ${high - low}")
 }
