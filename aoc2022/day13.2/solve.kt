@@ -102,7 +102,7 @@ fun main() {
     val divider2 = ListPacketData(ListPacketData(2))
     val divider6 = ListPacketData(ListPacketData(6))
 
-    val packets = arrayListOf(divider2, divider6)
+    val packets = arrayListOf<PacketData>(divider2, divider6)
 
     while (line != null) {
         val packet = parsePacket(line, Cursor(0))
