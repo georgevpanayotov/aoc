@@ -1,11 +1,9 @@
-package net.panayotov.test
-
 import net.panayotov.util.*
 
 const val DELAY = 200L
 
 fun clear() {
-    print("\u001b[2J")
+    print("\u001b[2J\u001b[H")
 }
 
 fun waitAndClear() {
