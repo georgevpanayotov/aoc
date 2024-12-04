@@ -46,8 +46,9 @@ class Grid<T>(val width: Int, val height: Int, default: T) {
         gridValues[row][col] = value
     }
 
-    fun isValid(point: Point): Boolean =
-        point.x >= 0 && point.x < width && point.y >= 0 && point.y < height
+    fun isValid(point: Point): Boolean = isValid(point.x, point.y)
+
+    fun isValid(x: Long, y: Long): Boolean = x >= 0 && x < width && y >= 0 && y < height
 
     override fun toString(): String {
         val stringRep = StringBuilder()
