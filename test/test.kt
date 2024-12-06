@@ -22,8 +22,11 @@ fun Grid<Char>.printForDirection(category: String, original: Point, direction: D
     this[newPoint] = '.'
 }
 
-fun main(args: Array<String>) {
+data class CharHolder(var held: Char) {
+    override fun toString(): String = StringBuilder().append(held).toString()
+}
 
+fun main(args: Array<String>) {
     val grid =
         if (args.size > 0) {
             if (args[0] == "stop") {
@@ -77,4 +80,23 @@ fun main(args: Array<String>) {
     for (point in points) {
         println("$point is ${point.toDirection()}")
     }
+
+    val mutableGrid = Grid<CharHolder>(4, 4) { CharHolder('A') }
+    mutableGrid[0, 0].held = 'B'
+    mutableGrid[1, 0].held = 'B'
+    mutableGrid[1, 1].held = 'B'
+    mutableGrid[0, 1].held = 'B'
+
+    print("This should have some B:\n$mutableGrid")
+
+    val transformedGrid = mutableGrid.map { it.copy() }
+
+    transformedGrid[2, 2].held = 'C'
+    transformedGrid[3, 2].held = 'C'
+    transformedGrid[3, 3].held = 'C'
+    transformedGrid[2, 3].held = 'C'
+
+    print("This shouldn't have changed:\n$mutableGrid")
+
+    print("This should have some C:\n$transformedGrid")
 }
