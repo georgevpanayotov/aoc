@@ -1,6 +1,6 @@
 package net.panayotov.util
 
-class Grid<T>(val width: Int, val height: Int, default: T) {
+class Grid<T>(val width: Int, val height: Int, private val default: T) {
     private val gridValues: MutableList<MutableList<T>> = mutableListOf<MutableList<T>>()
 
     init {
@@ -11,6 +11,20 @@ class Grid<T>(val width: Int, val height: Int, default: T) {
             }
 
             gridValues.add(row)
+        }
+    }
+
+    // Construct if the default might be a mutable object. We don't want to put the same mutable
+    // object in every spot in the grid so generate each one independently.
+    constructor(
+        width: Int,
+        height: Int,
+        defaultGenerator: () -> T,
+    ) : this(width, height, defaultGenerator()) {
+        for (y in 0..<height) {
+            for (x in 0..<width) {
+                gridValues[y][x] = defaultGenerator()
+            }
         }
     }
 
@@ -49,6 +63,33 @@ class Grid<T>(val width: Int, val height: Int, default: T) {
     fun isValid(point: Point): Boolean = isValid(point.x, point.y)
 
     fun isValid(x: Long, y: Long): Boolean = x >= 0 && x < width && y >= 0 && y < height
+
+    // A shallow copy of the grid. If a deep copy is necessary (such as in the case of mutable
+    // entries) then use the map method instead.
+    fun copy(): Grid<T> {
+        val copyGrid = Grid<T>(width, height, default)
+
+        for (x in 0L..<width) {
+            for (y in 0L..<height) {
+                copyGrid[x, y] = this[x, y]
+            }
+        }
+
+        return copyGrid
+    }
+
+    // A grid of the same size but each element having `transform` applied to it.
+    fun <R> map(transform: (T) -> R): Grid<R> {
+        val copyGrid = Grid<R>(width, height, transform(default))
+
+        for (x in 0L..<width) {
+            for (y in 0L..<height) {
+                copyGrid[x, y] = transform(this[x, y])
+            }
+        }
+
+        return copyGrid
+    }
 
     override fun toString(): String {
         val stringRep = StringBuilder()
