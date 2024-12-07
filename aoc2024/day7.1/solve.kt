@@ -1,17 +1,7 @@
 import net.panayotov.util.Lines
 
-data class Equation(val testValue: Long, val operands: List<Long>) {
-    fun evaluate(assignments: List<Operator>): Boolean {
-        var result = operands[0]
-        var i = 0
-        while (i < assignments.size) {
-            result = assignments[i].evaluate(result, operands[i + 1])
-            i++
-        }
-
-        return result == testValue
-    }
-
+// `operators` is the list of possible operators
+data class Equation(val testValue: Long, val operands: List<Long>, val operators: List<Operator>) {
     fun canBeSolved(): Boolean {
         val assignments = mutableListOf<Operator>()
         val aCount = operands.size - 1
@@ -21,14 +11,11 @@ data class Equation(val testValue: Long, val operands: List<Long>) {
         }
 
         var bitMask = 0
-        while (!assignments.done()) {
+        while (!done(assignments)) {
+            var working = bitMask
             for (i in 0..<aCount) {
-                assignments[i] =
-                    if ((bitMask shr i) % 2 == 0) {
-                        Plus
-                    } else {
-                        Times
-                    }
+                assignments[i] = operators[working % operators.size]
+                working /= operators.size
             }
 
             if (evaluate(assignments)) {
@@ -39,6 +26,20 @@ data class Equation(val testValue: Long, val operands: List<Long>) {
         }
 
         return false
+    }
+
+    private fun done(assignments: List<Operator>): Boolean =
+        assignments.fold(true) { acc, value -> acc && (value == operators[operators.size - 1]) }
+
+    private fun evaluate(assignments: List<Operator>): Boolean {
+        var result = operands[0]
+        var i = 0
+        while (i < assignments.size) {
+            result = assignments[i].evaluate(result, operands[i + 1])
+            i++
+        }
+
+        return result == testValue
     }
 }
 
@@ -54,11 +55,20 @@ object Times : Operator {
     override fun evaluate(lhs: Long, rhs: Long) = lhs * rhs
 }
 
-val OPERATORS = listOf(Plus, Times)
+object Concat : Operator {
+    override fun evaluate(lhs: Long, rhs: Long) = "${lhs.toString()}${rhs.toString()}".toLong()
+}
 
-fun List<Operator>.done() = this.fold(true) { acc, value -> acc && (value == Times) }
+val P1_OPERATORS = listOf(Plus, Times)
+val P2_OPERATORS = listOf(Plus, Times, Concat)
 
-fun main() {
+fun main(args: Array<String>) {
+    val operators =
+        if (args.size > 0 && args[0] == "p2") {
+            P2_OPERATORS
+        } else {
+            P1_OPERATORS
+        }
     var score = 0L
     for (line in Lines) {
         val parts = line.split(':')
@@ -66,6 +76,7 @@ fun main() {
             Equation(
                 parts[0].trim().toLong(),
                 parts[1].trim().split(" ").map(String::trim).map(String::toLong),
+                operators,
             )
         if (eq.canBeSolved()) {
             score += eq.testValue
