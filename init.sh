@@ -1,9 +1,11 @@
 #!/bin/zsh
 
+SCRIPT_DIR=$(dirname $0)
+
 do_init() {
     mkdir -p $1
-    cp template/Makefile $1/
-    cp template/solve.kt $1/
+    cp $SCRIPT_DIR/template/Makefile $1/
+    cp $SCRIPT_DIR/template/solve.kt $1/
     touch $1/input
     touch $1/sample_input
 }

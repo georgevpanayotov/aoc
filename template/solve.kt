@@ -1,7 +1,11 @@
-import net.panayotov.util.Scanners
-import net.panayotov.util.Lines
+import net.panayotov.util.Direction
+import net.panayotov.util.Edsger
 import net.panayotov.util.findMinMax
 import net.panayotov.util.Grid
+import net.panayotov.util.Lines
+import net.panayotov.util.MinMax
+import net.panayotov.util.Point
+import net.panayotov.util.Scanners
 
 import java.util.Scanner
 
