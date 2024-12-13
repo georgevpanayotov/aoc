@@ -33,13 +33,7 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
     }
 
     operator fun get(x: Long, y: Long): T {
-        if (x < 0 || x >= width) {
-            error("$x is out of range: [0, $width)")
-        }
-        if (y < 0 || y >= width) {
-            error("$y is out of range: [0, $height)")
-        }
-
+        assertValid(x, y)
         val (row, col) = rowCol(x, y)
         return gridValues[row][col]
     }
@@ -49,20 +43,14 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
     }
 
     operator fun set(x: Long, y: Long, value: T) {
-        if (x < 0 || x >= width) {
-            error("$x is out of range: [0, $width)")
-        }
-        if (y < 0 || y >= width) {
-            error("$y is out of range: [0, $height)")
-        }
-
+        assertValid(x, y)
         val (row, col) = rowCol(x, y)
         gridValues[row][col] = value
     }
 
     fun isValid(point: Point): Boolean = isValid(point.x, point.y)
 
-    fun isValid(x: Long, y: Long): Boolean = x >= 0 && x < width && y >= 0 && y < height
+    fun isValid(x: Long, y: Long): Boolean = isXValid(x) && isYValid(y)
 
     // A shallow copy of the grid. If a deep copy is necessary (such as in the case of mutable
     // entries) then use the map method instead.
@@ -167,4 +155,17 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
     // [row][col]
     private fun rowCol(x: Long, y: Long): Pair<Int, Int> =
         Pair((height - y - 1L).toInt(), x.toInt())
+
+    private fun isXValid(x: Long): Boolean = x >= 0 && x < width
+
+    private fun isYValid(y: Long): Boolean = y >= 0 && y < height
+
+    private fun assertValid(x: Long, y: Long) {
+        if (!isXValid(x)) {
+            error("$x is out of range: [0, $width)")
+        }
+        if (!isYValid(y)) {
+            error("$y is out of range: [0, $height)")
+        }
+    }
 }
