@@ -1,34 +1,27 @@
 import java.util.Scanner
 import net.panayotov.util.Point
 
-const val EPSILON = .00001
-
-fun Point.toVector() = Vector(x.toDouble(), y.toDouble())
+const val ANSWER_OFFSET = 10000000000000L
+val ANSWER_OFFSET_VECTOR = Point(ANSWER_OFFSET, ANSWER_OFFSET)
 
 fun Point.computeTokens() = 3L * x + y
 
-data class Vector(val x: Double, val y: Double) {
-    fun toPoint() = Point((x + .0001).toLong(), (y + .0001).toLong())
+data class Matrix(val a: Long, val b: Long, val c: Long, val d: Long, val mod: Long) {
+    constructor(a: Long, b: Long, c: Long, d: Long) : this(a, b, c, d, 1L) {}
 
-    fun valid(): Boolean {
-        val point = toPoint()
-        // Both are integers?
-        return kotlin.math.abs(point.x - x) < EPSILON && kotlin.math.abs(point.y - y) < EPSILON
-    }
-}
-
-data class Matrix(val a: Double, val b: Double, val c: Double, val d: Double) {
-    fun transform(vector: Vector): Vector =
-        Vector(vector.x * a + vector.y * b, vector.x * c + vector.y * d)
-
-    fun invert(): Matrix? {
-        val det = a * d - b * c
-
-        return if (det < EPSILON && det > -EPSILON) null
-        else {
-            Matrix(1 / det * d, 1 / det * -b, 1 / det * -c, 1 / det * a)
+    fun transform(vector: Point): Point? {
+        val newX = vector.x * a + vector.y * b
+        val newY = vector.x * c + vector.y * d
+        return if (newX % mod == 0L && newY % mod == 0L) {
+            Point(newX / mod, newY / mod)
+        } else {
+            null
         }
     }
+
+    private fun invDet() = a * d - b * c
+
+    fun invert() = Matrix(d, -b, -c, a, invDet())
 }
 
 fun readPoint(scanner: Scanner): Point {
@@ -51,32 +44,28 @@ fun nextScanner(): Scanner {
     return Scanner(line)
 }
 
-fun main() {
+fun main(args: Array<String>) {
     var done = false
     var score = 0L
     while (!done) {
         val pointA = readPoint(nextScanner())
         val pointB = readPoint(nextScanner())
 
-        val answer = readAnswer(nextScanner())
+        val answer =
+            readAnswer(nextScanner()) +
+                if (args.size > 0 && args[0] == "p2") {
+                    ANSWER_OFFSET_VECTOR
+                } else {
+                    Point(0L, 0L)
+                }
 
-        val matrix =
-            Matrix(
-                pointA.x.toDouble(),
-                pointB.x.toDouble(),
-                pointA.y.toDouble(),
-                pointB.y.toDouble(),
-            )
+        val matrix = Matrix(pointA.x, pointB.x, pointA.y, pointB.y)
         val inverse = matrix.invert()
 
-        if (inverse != null) {
-            val invertedVector = inverse.transform(answer.toVector())
-            if (invertedVector.valid()) {
-                val inverted = invertedVector.toPoint()
-                score += inverted.computeTokens()
-            }
-        } else {
-            println("No inverse")
+        var inverted = inverse.transform(answer)
+
+        if (inverted != null) {
+            score += inverted.computeTokens()
         }
 
         if (readLine() == null) {

@@ -4,5 +4,11 @@ all:
 run:
 	kotlin -cp bin SolveKt < input
 
+run2:
+	kotlin -cp bin SolveKt p2 < input
+
 sample:
 	kotlin -cp bin SolveKt < sample_input
+
+sample2:
+	kotlin -cp bin SolveKt p2 < sample_input
