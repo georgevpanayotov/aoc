@@ -1,8 +1,6 @@
-all:
-	kotlinc solve.kt ../../utils/*.kt -d bin
-
 run:
-	kotlin -cp bin SolveKt < input
+	echo "Day13.1 includes a generic solution for both parts"
 
 sample:
-	kotlin -cp bin SolveKt < sample_input
+	echo "Day13.1 includes a generic solution for both parts"
+
