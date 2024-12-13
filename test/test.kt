@@ -99,4 +99,21 @@ fun main(args: Array<String>) {
     print("This shouldn't have changed:\n$mutableGrid")
 
     print("This should have some C:\n$transformedGrid")
+
+    // Make sure that grids that are taller than wide or wider than tall are correctly checking all
+    // bounds.
+    val tallGrid = Grid<Char>(3, 20, '.')
+    val wideGrid = Grid<Char>(20, 3, '.')
+
+    for (fillGrid in listOf(wideGrid, tallGrid)) {
+        for (x in 0L..<fillGrid.width) {
+            for (y in 0L..<fillGrid.height) {
+                fillGrid[x, y] = '#'
+                if (fillGrid[x, y] != '#') {
+                    error("$fillGrid fail")
+                }
+            }
+        }
+        println(fillGrid)
+    }
 }
