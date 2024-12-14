@@ -12,4 +12,8 @@ data class Point(val x: Long, val y: Long) {
     operator fun unaryMinus() = Point(-x, -y)
 
     operator fun minus(other: Point): Point = this + -other
+
+    operator fun times(scalar: Long): Point = Point(scalar * x, scalar * y)
 }
+
+operator fun Long.times(point: Point): Point = Point(this * point.x, this * point.y)
