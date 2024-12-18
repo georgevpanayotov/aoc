@@ -4,6 +4,11 @@ interface GraphLike<T> {
     fun getNeighbors(node: T): List<T>
 
     fun getNodes(): List<T>
+
+    fun getEdgeWeight(from: T, to: T): Int {
+        // By default every edge has weight 1.
+        return 1
+    }
 }
 
 // Find the shortest paths from a single source to every other node in the graph. Returns a map from
@@ -42,11 +47,11 @@ fun <T>edsger(from: T, graph: GraphLike<T>): Map<T, List<T>> {
                 continue
             }
 
-            val alt = dm + 1
+            val alt = dm + graph.getEdgeWeight(min, neighbor)
             val dn = dist[neighbor]
             if (dn == null || alt < dn) {
                 prev[neighbor] = min
-                dist[neighbor] = dm + 1
+                dist[neighbor] = alt
             }
         }
     }
