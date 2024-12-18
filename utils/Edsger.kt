@@ -13,7 +13,7 @@ interface GraphLike<T> {
 
 // Find the shortest paths from a single source to every other node in the graph. Returns a map from
 // every destination to the shortest path between source and destination.
-fun <T>edsger(from: T, graph: GraphLike<T>): Map<T, List<T>> {
+fun <T> edsger(from: T, graph: GraphLike<T>): Map<T, List<T>> {
     val unvisited = mutableSetOf<T>()
 
     unvisited.addAll(graph.getNodes())
@@ -67,7 +67,9 @@ fun <T>edsger(from: T, graph: GraphLike<T>): Map<T, List<T>> {
             curr = prev[curr]
         }
 
-        paths[to] = path.reversed().toList()
+        if (path[path.size - 1] == from) {
+            paths[to] = path.reversed().toList()
+        }
     }
 
     return paths.toMap()
