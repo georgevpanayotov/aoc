@@ -1,0 +1,23 @@
+sample:
+Adv 3 // A / 2^3 -> A
+Out 4 // out(A % 8)
+Jnz 0 // if (A != 0) goto 0
+
+problem:
+0  Bst 4 B := A % 8
+1  Bxl 1 B := B xor 1
+2  Cdv 5 C := A / 2 ^ B
+3  Adv 3 A := A / 2 ^ 3
+4  Bxc 7 B := B xor C
+5  Bxl 6 B := B xor 6
+6  Out 5 print(B % 8)
+7  Jnz 0 if (a == 0) goto 0
+
+do {
+    b = (a % 8) xor 1 // Pull lowest 3 bits flip the lowest one
+    c = a / (2 ^ b) // shift right by those lowset 3 bits (%flipped)
+    b = b xor c // xor lowest 3 bits (flipped 1) with shifted input
+    b = b xor 6 // flip bits 2,3
+    println(b % 8) // print that
+    a = a / 8 // move on to next 3 bits
+} while (a != 0)
