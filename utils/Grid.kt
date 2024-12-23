@@ -57,27 +57,29 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
     fun copy(): Grid<T> {
         val copyGrid = Grid<T>(width, height, default)
 
-        for (x in 0L..<width) {
-            for (y in 0L..<height) {
-                copyGrid[x, y] = this[x, y]
-            }
-        }
+        forPoints { point, value -> copyGrid[point] = value }
 
         return copyGrid
     }
 
     // A grid of the same size but each element having `transform` applied to it.
     fun <R> map(transform: (T) -> R): Grid<R> {
-        val copyGrid = Grid<R>(width, height, transform(default))
+        val mappedGrid = Grid<R>(width, height, transform(default))
 
+        forPoints { point, value -> mappedGrid[point] = transform(value) }
+
+        return mappedGrid
+    }
+
+    fun forPoints(action: (point: Point, value: T) -> Unit) {
         for (x in 0L..<width) {
             for (y in 0L..<height) {
-                copyGrid[x, y] = transform(this[x, y])
+                action(Point(x, y), this[x, y])
             }
         }
-
-        return copyGrid
     }
+
+    fun forPoints(action: (point: Point) -> Unit) = forPoints { point, value -> action(point) }
 
     override fun toString(): String {
         val stringRep = StringBuilder()
