@@ -135,7 +135,9 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
             }
 
             if (width == null) {
-                error("Empty input")
+                // Kinda sketch but I don't want to make all of the read functions have to return
+                // nulls.
+                return Grid(0, 0, default)
             }
 
             val grid = Grid(width, lines.size, default)
