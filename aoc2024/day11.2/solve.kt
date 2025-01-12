@@ -26,7 +26,7 @@ fun blinkStone(stone: String) =
     }
 
 // This version is recursive so it can do memoization.
-fun blink(memo: MutableMap<Frame, Long>, blinks: Int, stones: List<String>) =
+fun blink(memo: MutableMap<Frame, Long>, blinks: Int, stones: List<String>): Long {
     if (stones.size == 1) {
         val stone = stones[0]
         val frame = Frame(blinks, stone)
@@ -51,6 +51,7 @@ fun blink(memo: MutableMap<Frame, Long>, blinks: Int, stones: List<String>) =
     } else {
         return 0
     }
+}
 
 fun main() {
     val stones = readStones()
