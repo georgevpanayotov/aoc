@@ -6,27 +6,8 @@ import net.panayotov.util.Scanners
 import net.panayotov.util.edsger
 
 class GridGraph(private val grid: Grid<Char>) : GraphLike<Point> {
-    private val nodes: List<Point>
-
-    init {
-        val mutableNodes = mutableListOf<Point>()
-
-        for (x in 0L..<grid.width) {
-            for (y in 0L..<grid.height) {
-                val point = Point(x, y)
-                if (grid[point] != '#') {
-                    mutableNodes.add(point)
-                }
-            }
-        }
-
-        nodes = mutableNodes.toList()
-    }
-
     override fun getNeighbors(node: Point): List<Point> =
         Direction.cardinal.map { node + it.vector }.filter { grid.isValid(it) && grid[it] != '#' }
-
-    override fun getNodes(): List<Point> = nodes
 }
 
 fun isReachable(grid: Grid<Char>): Boolean {

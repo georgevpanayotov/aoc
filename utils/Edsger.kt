@@ -1,9 +1,9 @@
 package net.panayotov.util
 
+import java.util.PriorityQueue
+
 interface GraphLike<T> {
     fun getNeighbors(node: T): List<T>
-
-    fun getNodes(): List<T>
 
     fun getEdgeWeight(from: T, to: T): Int {
         // By default every edge has weight 1.
@@ -11,60 +11,55 @@ interface GraphLike<T> {
     }
 }
 
+private data class State<T>(val node: T, val prev: T?, val score: Int) {
+    constructor(node: T) : this(node, null, 0)
+
+    fun next(neighbor: T, weight: Int) = State<T>(neighbor, node, score + weight)
+}
+
+fun <T> edsger(from: T, graph: GraphLike<T>) = edsger(from, graph) { false }
+
 // Find the shortest paths from a single source to every other node in the graph. Returns a map from
 // every destination to the shortest path between source and destination.
-fun <T> edsger(from: T, graph: GraphLike<T>): Map<T, List<T>> {
-    val unvisited = mutableSetOf<T>()
+fun <T> edsger(from: T, graph: GraphLike<T>, terminate: (T) -> Boolean): Map<T, List<T>> {
+    val queue = PriorityQueue<State<T>>(compareBy { it.score })
+    val seen = mutableSetOf<T>()
 
-    unvisited.addAll(graph.getNodes())
+    queue.add(State<T>(from))
 
-    val dist = mutableMapOf<T, Int>()
-    dist[from] = 0
+    val linkedPrev = mutableMapOf<T, T>()
 
-    val prev = mutableMapOf<T, T>()
+    while (!queue.isEmpty()) {
+        val state = queue.poll()
+        val (node, prev, score) = state
 
-    while (!unvisited.isEmpty()) {
-        var min: T? = null
-        for (pos in unvisited) {
-            val dp = dist[pos]
-            val dm = dist[min]
-            if (dp != null && ((min == null) || (dm != null && dp < dm))) {
-                min = pos
-            }
+        if (!seen.add(node)) {
+            continue
         }
-        if (min == null) {
+
+        if (prev != null) {
+            linkedPrev[node] = prev
+        }
+
+        for (neighbor in graph.getNeighbors(node)) {
+            val weight = graph.getEdgeWeight(node, neighbor)
+            queue.add(state.next(neighbor, weight))
+        }
+
+        if (terminate(node)) {
             break
-        }
-
-        unvisited.remove(min)
-        val dm = dist[min]
-        if (dm == null) {
-            error("There should be a dm.")
-        }
-
-        for (neighbor in graph.getNeighbors(min)) {
-            if (!unvisited.contains(neighbor)) {
-                continue
-            }
-
-            val alt = dm + graph.getEdgeWeight(min, neighbor)
-            val dn = dist[neighbor]
-            if (dn == null || alt < dn) {
-                prev[neighbor] = min
-                dist[neighbor] = alt
-            }
         }
     }
 
     val paths = mutableMapOf<T, List<T>>()
 
-    for (to in graph.getNodes()) {
+    for (to in seen) {
         val path = mutableListOf<T>()
         var curr: T? = to
 
         while (curr != null) {
             path.add(curr)
-            curr = prev[curr]
+            curr = linkedPrev[curr]
         }
 
         if (path[path.size - 1] == from) {
