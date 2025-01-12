@@ -1,7 +1,8 @@
-import java.util.PriorityQueue
 import net.panayotov.util.Direction
+import net.panayotov.util.GraphLike
 import net.panayotov.util.Grid
 import net.panayotov.util.Point
+import net.panayotov.util.edsger
 
 data class Blizzard(val position: Point, val direction: Direction) {
     // Move once in the given direction.
@@ -83,42 +84,39 @@ fun findPositions(grid: Grid<Char>): Pair<Point, Point> {
     return Pair(start, end)
 }
 
-data class State(val score: Int, val position: Point, val step: Int) {
-    fun proposeNext(cyclesSize: Int): List<State> {
+data class Node(val position: Point, val step: Int) {
+    fun proposeNext(cyclesSize: Int): List<Node> {
         // For steps beyond the step list, loop back to the start.
         val nextStep = (step + 1) % cyclesSize
 
         // Valid positions include staying in the same spot.
         val positions = Direction.cardinal.map { position + it.vector } + listOf(position)
 
-        return positions.map { State(score + 1, it, nextStep) }
+        return positions.map { Node(it, nextStep) }
     }
 }
 
+class BlizzardGraph(val grid: Grid<Char>, val cycles: List<Set<Point>>) : GraphLike<Node> {
+    override fun getNeighbors(node: Node) =
+        node.proposeNext(cycles.size).filter { possibleStep(it.position, grid, cycles[it.step]) }
+}
+
 fun findShortest(grid: Grid<Char>, cycles: List<Set<Point>>, start: Point, end: Point): Int {
-    val queue = PriorityQueue<State>(compareBy { it.score })
-    val seen = mutableSetOf<Pair<Point, Int>>()
+    val graph = BlizzardGraph(grid, cycles)
+    val paths = edsger(Node(start, 0), graph) { it.position == end }
 
-    queue.add(State(0, start, 0))
+    val shortests = mutableListOf<Int>()
 
-    while (!queue.isEmpty()) {
-        val state = queue.poll()!!
-        val (score, position, step) = state
+    for (key in paths.keys) {
+        val (point, step) = key
 
-        if (position == end) {
-            return score
+        if (point == end) {
+            shortests.add(paths[key]!!.size)
         }
-
-        if (!seen.add(Pair(position, step))) {
-            continue
-        }
-
-        val next = state.proposeNext(cycles.size)
-
-        queue.addAll(next.filter { possibleStep(it.position, grid, cycles[it.step]) })
     }
 
-    error("Failed to reach end.")
+    // Subtract 1 because this is giving us the whole path but we just want the number of steps.
+    return shortests.sorted()[0] - 1
 }
 
 fun main() {

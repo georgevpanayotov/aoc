@@ -5,23 +5,6 @@ import net.panayotov.util.Point
 import net.panayotov.util.edsger
 
 class GridGraph(private val grid: Grid<Char>) : GraphLike<Pair<Point, Direction>> {
-    private val nodes: List<Pair<Point, Direction>>
-
-    init {
-        val mutableNodes = mutableListOf<Pair<Point, Direction>>()
-
-        for (x in 0L..<grid.width) {
-            for (y in 0L..<grid.height) {
-                val point = Point(x, y)
-                if (grid[point] == '.' || grid[point] == 'S' || grid[point] == 'E') {
-                    mutableNodes.addAll(Direction.cardinal.map { Pair(point, it) })
-                }
-            }
-        }
-
-        nodes = mutableNodes.toList()
-    }
-
     override fun getNeighbors(node: Pair<Point, Direction>): List<Pair<Point, Direction>> {
         val (point, direction) = node
 
@@ -35,11 +18,11 @@ class GridGraph(private val grid: Grid<Char>) : GraphLike<Pair<Point, Direction>
             }
             .filter {
                 val (newPoint, newDirection) = it
-                grid.isValid(newPoint) && (newDirection.vector + direction.vector) != Point(0, 0)
+                grid.isValid(newPoint) &&
+                    grid[newPoint] != '#' &&
+                    (newDirection.vector + direction.vector) != Point(0, 0)
             }
     }
-
-    override fun getNodes(): List<Pair<Point, Direction>> = nodes
 
     override fun getEdgeWeight(from: Pair<Point, Direction>, to: Pair<Point, Direction>): Int {
         val (fromPoint, fromDir) = from
