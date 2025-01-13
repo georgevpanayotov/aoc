@@ -63,3 +63,12 @@ fun findMinMaxTriple(triples: Iterator<Triple<Int, Int, Int>>): Pair<Triple<Int,
     return Pair(Triple(minX, minY, minZ), Triple(maxX, maxY, maxZ))
 
 }
+
+fun findMinMaxPoint(points: Iterable<Point>): Pair<Point, Point>? {
+    val minX = points.map { it.x }.min()
+    val minY = points.map { it.y }.min()
+    val maxX = points.map { it.x }.max()
+    val maxY = points.map { it.y }.max()
+
+    return Pair(Point(minX, minY), Point(maxX, maxY))
+}
