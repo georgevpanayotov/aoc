@@ -1,3 +1,4 @@
+import java.awt.Color
 import net.panayotov.util.*
 
 const val DELAY = 200L
@@ -43,6 +44,17 @@ fun main(args: Array<String>) {
         } else {
             Grid.read('.')
         }
+
+    val image = ImageMaker(Point(0, 0), Point(grid.width.toLong(), grid.height.toLong()))
+    image.drawBackground(Color.BLACK)
+    image.drawBorder(Color.WHITE)
+    grid.forPoints { pt, value ->
+        if (value != '.') {
+            image.drawRect(pt, pt, Color.GREEN)
+        }
+    }
+    image.drawLine(Point(0, 1), Point(4, 1), Color.WHITE)
+    image.write("test_img")
 
     val original = Point(2L, 2L)
 
