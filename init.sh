@@ -17,7 +17,8 @@ fi
 
 echo "Initing and tracking $1"
 do_init $1
-git add $1/*
+git add $1/Makefile
+git add $1/solve.kt
 shift
 
 while [[ "$1" != "" ]]; do
