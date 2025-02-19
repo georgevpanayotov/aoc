@@ -21,4 +21,5 @@ cp_it ./sample_input
 cp_it ./solve.kt
 cp_it ./Makefile
 
-git add ../$curr
+git add ../$curr/solve.kt
+git add ../$curr/Makefile
