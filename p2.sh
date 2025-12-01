@@ -11,10 +11,12 @@ curr[$#curr]=2
 
 cp_it() {
     echo "copying $1"
-    cp ./$1 ../$curr/
+    if [[ ! -e ../$curr/$1 ]]; then
+        cp ./$1 ../$curr/
+    fi
 }
 
-mkdir ../$curr
+mkdir -p ../$curr
 
 cp_it ./input
 cp_it ./sample_input

@@ -4,8 +4,12 @@ SCRIPT_DIR=$(dirname $0)
 
 do_init() {
     mkdir -p $1
-    cp $SCRIPT_DIR/template/Makefile $1/
-    cp $SCRIPT_DIR/template/solve.kt $1/
+    if [[ ! -e $1/Makefile ]]; then
+        cp $SCRIPT_DIR/template/Makefile $1/
+    fi
+    if [[ ! -e $1/solve.kt ]]; then
+        cp $SCRIPT_DIR/template/solve.kt $1/
+    fi
     touch $1/input
     touch $1/sample_input
 }
