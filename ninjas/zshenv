@@ -1,0 +1,2 @@
+AOC_PATH=$(realpath $(dirname $0)/..)
+PATH=$PATH:$AOC_PATH
