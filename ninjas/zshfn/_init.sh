@@ -5,15 +5,19 @@
 # Add completions if a particular year has been chosen.
 compyear() {
     matching_year=$1
+    disp_year="$1/"
+    if [[ $matching_year == "." ]]; then
+        disp_year=""
+    fi
 
     if [[ -e $matching_year ]]; then
         local last_word=$words[$#words]
         find $matching_year -maxdepth 1 -type d | grep '^.*\/day\(\d\+.\d\+\)$' | sed -E 's/^.*day([0-9]+)\.[0-9]+$/\1/' | while read i; do
             # We only init the first part of the day's puzzle so ditch the ".2" suffix.
             # Part2 will be handled by the p2.sh script.
-            compadd $matching_year/day$i.1
-            if (( i < 25 )) ; then
-                compadd $matching_year/day$((i + 1)).1
+            local new_day=$(( i + 1 ))
+            if [[ $new_day -le 25 && ! -e ${matching_year}/day${new_day}.1 ]] ; then
+                compadd ${disp_year}day$((i + 1)).1
             fi
         done
     else
@@ -52,6 +56,6 @@ if [[ "$PWD" == "$AOC_PATH" ]]; then
     fi
 elif [[ "$(realpath "$PWD"/..)" == "$AOC_PATH" ]]; then
     # PWD implies the year is selected.
-    compyear $(basename $PWD)
+    compyear .
 else
 fi
