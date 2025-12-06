@@ -81,6 +81,33 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
 
     fun forPoints(action: (point: Point) -> Unit) = forPoints { point, value -> action(point) }
 
+    // Transpose around a diagonal from 0, 0 -> width, height (i.e. flip x and y).
+    fun transposed(): Grid<T> {
+        val transposed = Grid<T>(height, width, default)
+
+        forPoints { pt, value -> transposed[pt.y, pt.x] = value }
+
+        return transposed
+    }
+
+    // Mirrored around the x-axis.
+    fun flippedX(): Grid<T> {
+        val flipped = Grid<T>(width, height, default)
+
+        forPoints { pt, value -> flipped[pt.x, height - pt.y - 1] = value }
+
+        return flipped
+    }
+
+    // Mirrored around the y-axis.
+    fun flippedY(): Grid<T> {
+        val flipped = Grid<T>(width, height, default)
+
+        forPoints { pt, value -> flipped[width - pt.x - 1, pt.y] = value }
+
+        return flipped
+    }
+
     override fun toString(): String {
         val stringRep = StringBuilder()
 
