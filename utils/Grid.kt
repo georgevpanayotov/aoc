@@ -193,10 +193,10 @@ class Grid<T>(val width: Int, val height: Int, private val default: T) {
 
     private fun assertValid(x: Long, y: Long) {
         if (!isXValid(x)) {
-            error("$x is out of range: [0, $width)")
+            error("$x is out of range for X coordinate: [0, $width)")
         }
         if (!isYValid(y)) {
-            error("$y is out of range: [0, $height)")
+            error("$y is out of range for Y coordinate: [0, $height)")
         }
     }
 }
